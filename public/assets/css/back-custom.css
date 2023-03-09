@@ -1,0 +1,3 @@
+.product-variant-modal-body {
+    max-height: calc(100vh - 190px) !important;
+}

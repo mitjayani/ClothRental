@@ -26,6 +26,8 @@
     <link rel="stylesheet" href="{{ static_asset('assets/css/bootstrap-rtl.min.css') }}">
     @endif
 	<link rel="stylesheet" href="{{ static_asset('assets/css/aiz-core.css') }}">
+	<link rel="stylesheet" href="{{ static_asset('assets/css/back-custom.css') }}">
+
 
     <style>
         body {

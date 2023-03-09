@@ -3,8 +3,8 @@
 @section('content')
 
 @php
-    CoreComponentRepository::instantiateShopRepository();
-    CoreComponentRepository::initializeCache();
+CoreComponentRepository::instantiateShopRepository();
+CoreComponentRepository::initializeCache();
 @endphp
 
 <div class="aiz-titlebar text-left mt-2 mb-3">
@@ -13,13 +13,13 @@
 <div class="">
     <!-- Error Meassages -->
     @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
     @endif
     <form class="form form-horizontal mar-top" action="{{route('products.store')}}" method="POST" enctype="multipart/form-data" id="choice_form">
         <div class="row gutters-5">
@@ -28,19 +28,14 @@
                 <input type="hidden" name="added_by" value="admin">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="mb-0 h6">{{translate('Product Information')}}</h5>
+                        <h5 class="mb-0 h6">{{translate('Product Overview')}}</h5>
                     </div>
                     <div class="card-body">
-                        <div class="form-group row">
-                            <label class="col-md-3 col-from-label">{{translate('Product Name')}} <span class="text-danger">*</span></label>
-                            <div class="col-md-8">
-                                <input type="text" class="form-control" name="name" placeholder="{{ translate('Product Name') }}" onchange="update_sku()" required>
-                            </div>
-                        </div>
+
                         <div class="form-group row" id="category">
                             <label class="col-md-3 col-from-label">{{translate('Category')}} <span class="text-danger">*</span></label>
                             <div class="col-md-8">
-                                <select class="form-control aiz-selectpicker" name="category_id" id="category_id" data-live-search="true" required>
+                                <select class="form-control aiz-selectpicker" name="category_id" id="category_id" data-live-search="true">
                                     @foreach ($categories as $category)
                                     <option value="{{ $category->id }}">{{ $category->getTranslation('name') }}</option>
                                     @foreach ($category->childrenCategories as $childCategory)
@@ -62,21 +57,39 @@
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label class="col-md-3 col-from-label">{{translate('Unit')}}</label>
+                            <label class="col-md-3 col-from-label">{{translate('Product Name')}} <span class="text-danger">*</span></label>
                             <div class="col-md-8">
-                                <input type="text" class="form-control" name="unit" placeholder="{{ translate('Unit (e.g. KG, Pc etc)') }}" required>
+                                <input type="text" class="form-control" name="name" placeholder="{{ translate('Product Name') }}" onchange="update_sku()">
                             </div>
                         </div>
+
                         <div class="form-group row">
+                            <label class="col-md-3 col-from-label">{{translate('Has Product Variation')}}</label>
+                            <div class="col-md-6">
+                                <label class="aiz-switch aiz-switch-success mb-0">
+                                    <input type="checkbox" name="has_variant_product" value="1">
+                                    <span></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-md-3 col-from-label">{{translate('Unit')}}</label>
+                            <div class="col-md-8">
+                                <input type="text" class="form-control" value="Pc" name="unit" placeholder="{{ translate('Unit (e.g. KG, Pc etc)') }}">
+                            </div>
+                        </div>
+                        <!-- <div class="form-group row">
                             <label class="col-md-3 col-from-label">{{translate('Weight')}} <small>({{ translate('In Kg') }})</small></label>
                             <div class="col-md-8">
                                 <input type="number" class="form-control" name="weight" step="0.01" value="0.00" placeholder="0.00">
                             </div>
-                        </div>
+                        </div> -->
+                        
                         <div class="form-group row">
                             <label class="col-md-3 col-from-label">{{translate('Minimum Purchase Qty')}} <span class="text-danger">*</span></label>
                             <div class="col-md-8">
-                                <input type="number" lang="en" class="form-control" name="min_qty" value="1" min="1" required>
+                                <input type="number" lang="en" class="form-control" name="min_qty" value="1" min="1">
                             </div>
                         </div>
                         <div class="form-group row">
@@ -109,26 +122,11 @@
                         @endif
                     </div>
                 </div>
-                <div class="card">
+                <div class="card hide-on-variant">
                     <div class="card-header">
                         <h5 class="mb-0 h6">{{translate('Product Images')}}</h5>
                     </div>
                     <div class="card-body">
-                        <div class="form-group row">
-                            <label class="col-md-3 col-form-label" for="signinSrEmail">{{translate('Gallery Images')}} <small>(600x600)</small></label>
-                            <div class="col-md-8">
-                                <div class="input-group" data-toggle="aizuploader" data-type="image" data-multiple="true">
-                                    <div class="input-group-prepend">
-                                        <div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse')}}</div>
-                                    </div>
-                                    <div class="form-control file-amount">{{ translate('Choose File') }}</div>
-                                    <input type="hidden" name="photos" class="selected-files">
-                                </div>
-                                <div class="file-preview box sm">
-                                </div>
-                                <small class="text-muted">{{translate('These images are visible in product details page gallery. Use 600x600 sizes images.')}}</small>
-                            </div>
-                        </div>
                         <div class="form-group row">
                             <label class="col-md-3 col-form-label" for="signinSrEmail">{{translate('Thumbnail Image')}} <small>(300x300)</small></label>
                             <div class="col-md-8">
@@ -144,9 +142,25 @@
                                 <small class="text-muted">{{translate('This image is visible in all product box. Use 300x300 sizes image. Keep some blank space around main object of your image as we had to crop some edge in different devices to make it responsive.')}}</small>
                             </div>
                         </div>
+                        <div class="form-group row">
+                            <label class="col-md-3 col-form-label" for="signinSrEmail">{{translate('Gallery Images')}} <small>(600x600)</small></label>
+                            <div class="col-md-8">
+                                <div class="input-group" data-toggle="aizuploader" data-type="image" data-multiple="true">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text bg-soft-secondary font-weight-medium">{{ translate('Browse')}}</div>
+                                    </div>
+                                    <div class="form-control file-amount">{{ translate('Choose File') }}</div>
+                                    <input type="hidden" name="photos" class="selected-files">
+                                </div>
+                                <div class="file-preview box sm">
+                                </div>
+                                <small class="text-muted">{{translate('These images are visible in product details page gallery. Use 600x600 sizes images.')}}</small>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
-                <div class="card">
+                <div class="card hide-on-variant">
                     <div class="card-header">
                         <h5 class="mb-0 h6">{{translate('Product Videos')}}</h5>
                     </div>
@@ -180,18 +194,18 @@
                                 <input type="text" class="form-control" value="{{translate('Colors')}}" disabled>
                             </div>
                             <div class="col-md-8">
-                                <select class="form-control aiz-selectpicker" data-live-search="true" data-selected-text-format="count" name="colors[]" id="colors" multiple disabled>
+                                <select class="form-control aiz-selectpicker" data-live-search="true" data-selected-text-format="count" name="colors[]" id="colors" multiple>
                                     @foreach (\App\Models\Color::orderBy('name', 'asc')->get() as $key => $color)
-                                    <option  value="{{ $color->code }}" data-content="<span><span class='size-15px d-inline-block mr-2 rounded border' style='background:{{ $color->code }}'></span><span>{{ $color->name }}</span></span>"></option>
+                                    <option value="{{ $color->code }}" data-content="<span><span class='size-15px d-inline-block mr-2 rounded border' style='background:{{ $color->code }}'></span><span>{{ $color->name }}</span></span>"></option>
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-1">
+                            <!-- <div class="col-md-1">
                                 <label class="aiz-switch aiz-switch-success mb-0">
                                     <input value="1" type="checkbox" name="colors_active">
                                     <span></span>
                                 </label>
-                            </div>
+                            </div> -->
                         </div>
 
                         <div class="form-group row gutters-5">
@@ -214,31 +228,36 @@
                         <div class="customer_choice_options" id="customer_choice_options">
 
                         </div>
+
+                        <div class="sku_combination" id="sku_combination">
+
+                        </div>
                     </div>
                 </div>
-                <div class="card">
+      
+                <div class="card hide-on-variant">
                     <div class="card-header">
                         <h5 class="mb-0 h6">{{translate('Product price + stock')}}</h5>
                     </div>
                     <div class="card-body">
                         <div class="form-group row">
-                            <label class="col-md-3 col-from-label">{{translate('Unit price')}} <span class="text-danger">*</span></label>
+                            <label class="col-md-3 col-from-label">{{translate('Selling price')}} <span class="text-danger">*</span></label>
                             <div class="col-md-6">
-                                <input type="number" lang="en" min="0" value="0" step="0.01" placeholder="{{ translate('Unit price') }}" name="unit_price" class="form-control" required>
+                                <input type="number" lang="en" min="0" value="0" step="0.01" placeholder="{{ translate('Selling price') }}" name="unit_price" class="form-control">
                             </div>
                         </div>
 
                         <div class="form-group row">
-	                        <label class="col-sm-3 control-label" for="start_date">{{translate('Discount Date Range')}}</label>
-	                        <div class="col-sm-9">
-	                          <input type="text" class="form-control aiz-date-range" name="date_range" placeholder="{{translate('Select Date')}}" data-time-picker="true" data-format="DD-MM-Y HH:mm:ss" data-separator=" to " autocomplete="off">
-	                        </div>
-	                    </div>
+                            <label class="col-sm-3 control-label" for="start_date">{{translate('Discount Date Range')}}</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control aiz-date-range" name="date_range" placeholder="{{translate('Select Date')}}" data-time-picker="true" data-format="DD-MM-Y HH:mm:ss" data-separator=" to " autocomplete="off">
+                            </div>
+                        </div>
 
                         <div class="form-group row">
                             <label class="col-md-3 col-from-label">{{translate('Discount')}} <span class="text-danger">*</span></label>
                             <div class="col-md-6">
-                                <input type="number" lang="en" min="0" value="0" step="0.01" placeholder="{{ translate('Discount') }}" name="discount" class="form-control" required>
+                                <input type="number" lang="en" min="0" value="0" step="0.01" placeholder="{{ translate('Discount') }}" name="discount" class="form-control">
                             </div>
                             <div class="col-md-3">
                                 <select class="form-control aiz-selectpicker" name="discount_type">
@@ -249,21 +268,21 @@
                         </div>
 
                         @if(addon_is_activated('club_point'))
-                            <div class="form-group row">
-                                <label class="col-md-3 col-from-label">
-                                    {{translate('Set Point')}}
-                                </label>
-                                <div class="col-md-6">
-                                    <input type="number" lang="en" min="0" value="0" step="1" placeholder="{{ translate('1') }}" name="earn_point" class="form-control">
-                                </div>
+                        <div class="form-group row">
+                            <label class="col-md-3 col-from-label">
+                                {{translate('Set Point')}}
+                            </label>
+                            <div class="col-md-6">
+                                <input type="number" lang="en" min="0" value="0" step="1" placeholder="{{ translate('1') }}" name="earn_point" class="form-control">
                             </div>
+                        </div>
                         @endif
 
                         <div id="show-hide-div">
                             <div class="form-group row">
                                 <label class="col-md-3 col-from-label">{{translate('Quantity')}} <span class="text-danger">*</span></label>
                                 <div class="col-md-6">
-                                    <input type="number" lang="en" min="0" value="0" step="1" placeholder="{{ translate('Quantity') }}" name="current_stock" class="form-control" required>
+                                    <input type="number" lang="en" min="0" value="0" step="1" placeholder="{{ translate('Quantity') }}" name="current_stock" class="form-control">
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -275,7 +294,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group row">
+                        <!-- <div class="form-group row">
                             <label class="col-md-3 col-from-label">
                                 {{translate('External link')}}
                             </label>
@@ -292,14 +311,128 @@
                                 <input type="text" placeholder="{{ translate('External link button text') }}" name="external_link_btn" class="form-control">
                                 <small class="text-muted">{{translate('Leave it blank if you do not use external site link')}}</small>
                             </div>
-                        </div>
+                        </div> -->
                         <br>
-                        <div class="sku_combination" id="sku_combination">
-
-                        </div>
+                    
                     </div>
                 </div>
-                <div class="card">
+
+                <div class="card hide-on-variant">
+                    <div class="card-header">
+                        <h5 class="mb-0 h6">
+                            {{translate('Shipping Charges')}}
+                        </h5>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="form-group row">
+                            <label class="col-md-3 col-from-label">{{translate('Local Charge')}} </label>
+                            <div class="col-md-6">
+                                <input type="number" lang="en" placeholder="{{ translate('Local Charge') }}" name="local_delivery_charge" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+
+                            <label class="col-md-3 col-from-label">{{translate('Zonal Charge')}}</label>
+                            <div class="col-md-6">
+                                <input type="number" lang="en" placeholder="{{ translate('Zonal Charge') }}" name="zonal_delivery_charge" class="form-control">
+                            </div>
+                        </div>
+
+
+
+                        <div class="form-group row">
+                            <label class="col-md-3 col-from-label">{{translate('National Charge')}} </label>
+                            <div class="col-md-6">
+                                <input type="number" lang="en" placeholder="{{ translate('National Charge') }}" name="zonal_delivery_charge" class="form-control">
+                            </div>
+                        </div>
+                        <!-- 
+                        @if (get_setting('shipping_type') == 'product_wise_shipping')
+                        <div class="form-group row">
+                            <label class="col-md-6 col-from-label">{{translate('Free Shipping')}}</label>
+                            <div class="col-md-6">
+                                <label class="aiz-switch aiz-switch-success mb-0">
+                                    <input type="radio" name="shipping_type" value="free" checked>
+                                    <span></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-md-6 col-from-label">{{translate('Flat Rate')}}</label>
+                            <div class="col-md-6">
+                                <label class="aiz-switch aiz-switch-success mb-0">
+                                    <input type="radio" name="shipping_type" value="flat_rate">
+                                    <span></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="flat_rate_shipping_div" style="display: none">
+                            <div class="form-group row">
+                                <label class="col-md-6 col-from-label">{{translate('Shipping cost')}}</label>
+                                <div class="col-md-6">
+                                    <input type="number" lang="en" min="0" value="0" step="0.01" placeholder="{{ translate('Shipping cost') }}" name="flat_shipping_cost" class="form-control" >
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-md-6 col-from-label">{{translate('Is Product Quantity Mulitiply')}}</label>
+                            <div class="col-md-6">
+                                <label class="aiz-switch aiz-switch-success mb-0">
+                                    <input type="checkbox" name="is_quantity_multiplied" value="1">
+                                    <span></span>
+                                </label>
+                            </div>
+                        </div>
+                        @else
+                        <p>
+                            {{ translate('Product wise shipping cost is disable. Shipping cost is configured from here') }}
+                            <a href="{{route('shipping_configuration.index')}}" class="aiz-side-nav-link {{ areActiveRoutes(['shipping_configuration.index','shipping_configuration.edit','shipping_configuration.update'])}}">
+                                <span class="aiz-side-nav-text">{{translate('Shipping Configuration')}}</span>
+                            </a>
+                        </p>
+                        @endif -->
+                    </div>
+                </div>
+
+                <div class="card hide-on-variant">
+                    <div class="card-header">
+                        <h5 class="mb-0 h6">{{translate('Product Packaging')}}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group row">
+                            <label class="col-md-3 col-from-label">{{translate('Package Weight')}}</label>
+                            <div class="col-md-8">
+                                <input type="text" class="form-control" name="weight" placeholder="{{ translate('Package Weight in KG') }}">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-md-3 col-from-label">{{translate('Package Length')}}</label>
+                            <div class="col-md-8">
+                                <input type="text" class="form-control" name="length" placeholder="{{ translate('Package Length in CM') }}">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-md-3 col-from-label">{{translate('Package Breadth')}}</label>
+                            <div class="col-md-8">
+                                <input type="text" class="form-control" name="breadth" placeholder="{{ translate('Package Breadth in CM') }}">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-md-3 col-from-label">{{translate('Package Height')}}</label>
+                            <div class="col-md-8">
+                                <input type="text" class="form-control" name="height" placeholder="{{ translate('Package Height in CM') }}">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="card hide-on-variant">
                     <div class="card-header">
                         <h5 class="mb-0 h6">{{translate('Product Description')}}</h5>
                     </div>
@@ -313,7 +446,7 @@
                     </div>
                 </div>
 
-<!--                <div class="card">
+                <!--                <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0 h6">{{translate('Product Shipping Cost')}}</h5>
                     </div>
@@ -322,7 +455,7 @@
                     </div>
                 </div>-->
 
-                <div class="card">
+                <div class="card hide-on-variant">
                     <div class="card-header">
                         <h5 class="mb-0 h6">{{translate('PDF Specification')}}</h5>
                     </div>
@@ -343,7 +476,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="card">
+
+          
+                <div class="card hide-on-variant">
                     <div class="card-header">
                         <h5 class="mb-0 h6">{{translate('SEO Meta Tags')}}</h5>
                     </div>
@@ -380,66 +515,32 @@
             </div>
 
             <div class="col-lg-4">
-
-                <div class="card">
+            <div class="card hide-on-variant">
                     <div class="card-header">
-                        <h5 class="mb-0 h6">
-                            {{translate('Shipping Configuration')}}
-                        </h5>
+                        <h5 class="mb-0 h6">{{translate('Tax Details')}}</h5>
                     </div>
-
                     <div class="card-body">
-                        @if (get_setting('shipping_type') == 'product_wise_shipping')
-                        <div class="form-group row">
-                            <label class="col-md-6 col-from-label">{{translate('Free Shipping')}}</label>
-                            <div class="col-md-6">
-                                <label class="aiz-switch aiz-switch-success mb-0">
-                                    <input type="radio" name="shipping_type" value="free" checked>
-                                    <span></span>
-                                </label>
-                            </div>
-                        </div>
+                        @foreach(\App\Models\Tax::where('tax_status', 1)->get() as $tax)
+                        <label for="name">
+                            {{$tax->name}}
+                            <input type="hidden" value="{{$tax->id}}" name="tax_id[]">
+                        </label>
 
-                        <div class="form-group row">
-                            <label class="col-md-6 col-from-label">{{translate('Flat Rate')}}</label>
-                            <div class="col-md-6">
-                                <label class="aiz-switch aiz-switch-success mb-0">
-                                    <input type="radio" name="shipping_type" value="flat_rate">
-                                    <span></span>
-                                </label>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <input type="number" lang="en" min="0" value="0" step="0.01" placeholder="{{ translate('Tax') }}" name="tax[]" class="form-control">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <select class="form-control aiz-selectpicker" name="tax_type[]">
+                                    <option value="amount">{{translate('Flat')}}</option>
+                                    <option value="percent">{{translate('Percent')}}</option>
+                                </select>
                             </div>
                         </div>
-
-                        <div class="flat_rate_shipping_div" style="display: none">
-                            <div class="form-group row">
-                                <label class="col-md-6 col-from-label">{{translate('Shipping cost')}}</label>
-                                <div class="col-md-6">
-                                    <input type="number" lang="en" min="0" value="0" step="0.01" placeholder="{{ translate('Shipping cost') }}" name="flat_shipping_cost" class="form-control" required>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label class="col-md-6 col-from-label">{{translate('Is Product Quantity Mulitiply')}}</label>
-                            <div class="col-md-6">
-                                <label class="aiz-switch aiz-switch-success mb-0">
-                                    <input type="checkbox" name="is_quantity_multiplied" value="1">
-                                    <span></span>
-                                </label>
-                            </div>
-                        </div>
-                        @else
-                        <p>
-                            {{ translate('Product wise shipping cost is disable. Shipping cost is configured from here') }}
-                            <a href="{{route('shipping_configuration.index')}}" class="aiz-side-nav-link {{ areActiveRoutes(['shipping_configuration.index','shipping_configuration.edit','shipping_configuration.update'])}}">
-                                <span class="aiz-side-nav-text">{{translate('Shipping Configuration')}}</span>
-                            </a>
-                        </p>
-                        @endif
+                        @endforeach
                     </div>
                 </div>
-
-                <div class="card">
+                <div class="card hide-on-variant">
                     <div class="card-header">
                         <h5 class="mb-0 h6">{{translate('Low Stock Quantity Warning')}}</h5>
                     </div>
@@ -453,13 +554,13 @@
                     </div>
                 </div>
 
-                <div class="card">
+                <!-- <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0 h6">
                             {{translate('Stock Visibility State')}}
                         </h5>
                     </div>
-
+                    
                     <div class="card-body">
 
                         <div class="form-group row">
@@ -493,35 +594,35 @@
                         </div>
 
                     </div>
-                </div>
+                </div> -->
 
-                <div class="card">
+                <!-- <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0 h6">{{translate('Cash On Delivery')}}</h5>
                     </div>
                     <div class="card-body">
                         @if (get_setting('cash_payment') == '1')
-                            <div class="form-group row">
-                                <label class="col-md-6 col-from-label">{{translate('Status')}}</label>
-                                <div class="col-md-6">
-                                    <label class="aiz-switch aiz-switch-success mb-0">
-                                        <input type="checkbox" name="cash_on_delivery" value="1" checked="">
-                                        <span></span>
-                                    </label>
-                                </div>
+                        <div class="form-group row">
+                            <label class="col-md-6 col-from-label">{{translate('Status')}}</label>
+                            <div class="col-md-6">
+                                <label class="aiz-switch aiz-switch-success mb-0">
+                                    <input type="checkbox" name="cash_on_delivery" value="1" checked="">
+                                    <span></span>
+                                </label>
                             </div>
+                        </div>
                         @else
-                            <p>
-                                {{ translate('Cash On Delivery option is disabled. Activate this feature from here') }}
-                                <a href="{{route('activation.index')}}" class="aiz-side-nav-link {{ areActiveRoutes(['shipping_configuration.index','shipping_configuration.edit','shipping_configuration.update'])}}">
-                                    <span class="aiz-side-nav-text">{{translate('Cash Payment Activation')}}</span>
-                                </a>
-                            </p>
+                        <p>
+                            {{ translate('Cash On Delivery option is disabled. Activate this feature from here') }}
+                            <a href="{{route('activation.index')}}" class="aiz-side-nav-link {{ areActiveRoutes(['shipping_configuration.index','shipping_configuration.edit','shipping_configuration.update'])}}">
+                                <span class="aiz-side-nav-text">{{translate('Cash Payment Activation')}}</span>
+                            </a>
+                        </p>
                         @endif
                     </div>
-                </div>
+                </div> -->
 
-                <div class="card">
+                <!-- <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0 h6">{{translate('Featured')}}</h5>
                     </div>
@@ -536,9 +637,9 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
-                <div class="card">
+                <!-- <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0 h6">{{translate('Todays Deal')}}</h5>
                     </div>
@@ -553,9 +654,9 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
-                <div class="card">
+                <!-- <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0 h6">{{translate('Flash Deal')}}</h5>
                     </div>
@@ -567,9 +668,9 @@
                             <select class="form-control aiz-selectpicker" name="flash_deal_id" id="flash_deal">
                                 <option value="">{{ translate('Choose Flash Title') }}</option>
                                 @foreach(\App\Models\FlashDeal::where("status", 1)->get() as $flash_deal)
-                                    <option value="{{ $flash_deal->id}}">
-                                        {{ $flash_deal->title }}
-                                    </option>
+                                <option value="{{ $flash_deal->id}}">
+                                    {{ $flash_deal->title }}
+                                </option>
                                 @endforeach
                             </select>
                         </div>
@@ -591,16 +692,16 @@
                             </select>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
-                <div class="card">
+                <div class="card hide-on-variant">
                     <div class="card-header">
-                        <h5 class="mb-0 h6">{{translate('Estimate Shipping Time')}}</h5>
+                        <h5 class="mb-0 h6">{{translate('Shipping Configration')}}</h5>
                     </div>
                     <div class="card-body">
                         <div class="form-group mb-3">
                             <label for="name">
-                                {{translate('Shipping Days')}}
+                                {{translate('Procedure SLA')}}
                             </label>
                             <div class="input-group">
                                 <input type="number" class="form-control" name="est_shipping_days" min="1" step="1" placeholder="{{translate('Shipping Days')}}">
@@ -612,31 +713,6 @@
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0 h6">{{translate('VAT & Tax')}}</h5>
-                    </div>
-                    <div class="card-body">
-                        @foreach(\App\Models\Tax::where('tax_status', 1)->get() as $tax)
-                        <label for="name">
-                            {{$tax->name}}
-                            <input type="hidden" value="{{$tax->id}}" name="tax_id[]">
-                        </label>
-
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                                <input type="number" lang="en" min="0" value="0" step="0.01" placeholder="{{ translate('Tax') }}" name="tax[]" class="form-control" required>
-                            </div>
-                            <div class="form-group col-md-6">
-                                <select class="form-control aiz-selectpicker" name="tax_type[]">
-                                    <option value="amount">{{translate('Flat')}}</option>
-                                    <option value="percent">{{translate('Percent')}}</option>
-                                </select>
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
 
             </div>
             <div class="col-12">
@@ -653,136 +729,252 @@
     </form>
 </div>
 
+@include('backend.product.products.add_edit_variant_modal')
+
 @endsection
 
 @section('script')
 
 <script type="text/javascript">
-    $('form').bind('submit', function (e) {
-		if ( $(".action-btn").attr('attempted') == 'true' ) {
-			//stop submitting the form because we have already clicked submit.
-			e.preventDefault();
-		}
-		else {
-			$(".action-btn").attr("attempted", 'true');
-		}
+    $('form').bind('submit', function(e) {
+        if ($(".action-btn").attr('attempted') == 'true') {
+            //stop submitting the form because we have already clicked submit.
+            e.preventDefault();
+        } else {
+            $(".action-btn").attr("attempted", 'true');
+        }
         // Disable the submit button while evaluating if the form should be submitted
         // $("button[type='submit']").prop('disabled', true);
-        
+
         // var valid = true;
 
         // if (!valid) {
-            // e.preventDefault();
-            
-            ////Reactivate the button if the form was not submitted
-            // $("button[type='submit']").button.prop('disabled', false);
+        // e.preventDefault();
+
+        ////Reactivate the button if the form was not submitted
+        // $("button[type='submit']").button.prop('disabled', false);
         // }
     });
-    
-    $("[name=shipping_type]").on("change", function (){
-        $(".flat_rate_shipping_div").hide();
-
-        if($(this).val() == 'flat_rate'){
-            $(".flat_rate_shipping_div").show();
-        }
-
-    });
-
-    function add_more_customer_choice_option(i, name){
-        $.ajax({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            type:"POST",
-            url:'{{ route('products.add-more-choice-option') }}',
-            data:{
-               attribute_id: i
-            },
-            success: function(data) {
-                var obj = JSON.parse(data);
-                $('#customer_choice_options').append('\
-                <div class="form-group row">\
-                    <div class="col-md-3">\
-                        <input type="hidden" name="choice_no[]" value="'+i+'">\
-                        <input type="text" class="form-control" name="choice[]" value="'+name+'" placeholder="{{ translate('Choice Title') }}" readonly>\
-                    </div>\
-                    <div class="col-md-8">\
-                        <select class="form-control aiz-selectpicker attribute_choice" data-live-search="true" name="choice_options_'+ i +'[]" multiple>\
-                            '+obj+'\
-                        </select>\
-                    </div>\
-                </div>');
-                AIZ.plugins.bootstrapSelect('refresh');
-           }
-       });
 
 
-    }
 
-    $('input[name="colors_active"]').on('change', function() {
-        if(!$('input[name="colors_active"]').is(':checked')) {
-            $('#colors').prop('disabled', true);
-            AIZ.plugins.bootstrapSelect('refresh');
-        }
-        else {
-            $('#colors').prop('disabled', false);
-            AIZ.plugins.bootstrapSelect('refresh');
-        }
-        update_sku();
-    });
+        $("[name=shipping_type]").on("change", function (){
+            $(".flat_rate_shipping_div").hide();
 
-    $(document).on("change", ".attribute_choice",function() {
-        update_sku();
-    });
+            if($(this).val() == 'flat_rate'){
+                $(".flat_rate_shipping_div").show();
+            }
 
-    $('#colors').on('change', function() {
-        update_sku();
-    });
-
-    $('input[name="unit_price"]').on('keyup', function() {
-        update_sku();
-    });
-
-    $('input[name="name"]').on('keyup', function() {
-        update_sku();
-    });
-
-    function delete_row(em){
-        $(em).closest('.form-group row').remove();
-        update_sku();
-    }
-
-    function delete_variant(em){
-        $(em).closest('.variant').remove();
-    }
-
-    function update_sku(){
-        $.ajax({
-           type:"POST",
-           url:'{{ route('products.sku_combination') }}',
-           data:$('#choice_form').serialize(),
-           success: function(data) {
-                $('#sku_combination').html(data);
-                AIZ.uploader.previewGenerate();
-                AIZ.plugins.fooTable();
-                if (data.length > 1) {
-                   $('#show-hide-div').hide();
-                }
-                else {
-                    $('#show-hide-div').show();
-                }
-           }
-       });
-    }
-
-    $('#choice_attributes').on('change', function() {
-        $('#customer_choice_options').html(null);
-        $.each($("#choice_attributes option:selected"), function(){
-            add_more_customer_choice_option($(this).val(), $(this).text());
         });
 
-        update_sku();
-    });
+        function add_more_customer_choice_option(i, name){
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                type:"POST",
+                url:'{{ route('products.add-more-choice-option') }}',
+                data:{
+                   attribute_id: i
+                },
+                success: function(data) {
+                    var obj = JSON.parse(data);
+                    $('#customer_choice_options').append('\
+                    <div class="form-group row">\
+                        <div class="col-md-3">\
+                            <input type="hidden" name="choice_no[]" value="'+i+'">\
+                            <input type="text" class="form-control" name="choice[]" value="'+name+'" placeholder="{{ translate('Choice Title') }}" readonly>\
+                        </div>\
+                        <div class="col-md-8">\
+                            <select class="form-control aiz-selectpicker attribute_choice" data-live-search="true" name="choice_options_'+ i +'[]" multiple>\
+                                '+obj+'\
+                            </select>\
+                        </div>\
+                    </div>');
+                    AIZ.plugins.bootstrapSelect('refresh');
+               }
+           });
+
+
+        }
+
+        $('input[name="has_variant_product"]').on('change', function() {
+            if(!$('input[name="has_variant_product"]').is(':checked')) {
+                // $('#colors').prop('disabled', true);
+                $('.hide-on-variant').show();
+                $('#sku_combination').html('');
+                AIZ.plugins.bootstrapSelect('refresh');
+            }
+            else {
+                // $('#colors').prop('disabled', false);
+                $('.hide-on-variant').hide();
+                 update_sku();
+
+                AIZ.plugins.bootstrapSelect('refresh');
+            }
+        });
+
+
+
+
+
+        $(document).on("change", ".attribute_choice",function() {
+            if($('input[name="has_variant_product"]').is(':checked')) {
+            update_sku();
+        }
+        });
+
+            
+        $('input[name="has_variant_product"]').on('change', function() {
+            if($('input[name="has_variant_product"]').is(':checked')) {
+            update_sku();
+        }
+        });
+
+        $('#colors').on('change', function() {
+            if($('input[name="has_variant_product"]').is(':checked')) {
+            update_sku();
+        }
+        });
+
+        $('input[name="unit_price"]').on('keyup', function() {
+            if($('input[name="has_variant_product"]').is(':checked')) {
+            update_sku();
+        }
+        });
+
+        $('input[name="name"]').on('keyup', function() {
+            if($('input[name="has_variant_product"]').is(':checked')) {
+            update_sku();
+        } });
+
+
+        $(document).on('click', '.variant-modal-btn', function() {
+            $('#variant-modal').modal('show', {backdrop: 'static'});
+            $('input[name="variant_id"]').val($(this).data('variant'));
+            $(".aiz-text-editor-md").each(function(el) {
+			var $this = $(this);
+
+			var buttons = $this.data("buttons");
+			var minHeight = $this.data("min-height");
+			var placeholder = $this.attr("placeholder");
+			var format = $this.data("format");
+
+			buttons = !buttons ? [
+					["font", ["bold", "underline", "italic", "clear"]],
+					["para", ["ul", "ol", "paragraph"]],
+					["style", ["style"]],
+					["color", ["color"]],
+					["table", ["table"]],
+					["insert", ["link", "picture", "video"]],
+					["view", ["fullscreen", "undo", "redo"]],
+				] :
+				buttons;
+			placeholder = !placeholder ? "" : placeholder;
+			minHeight = !minHeight ? 200 : minHeight;
+			format = (typeof format == 'undefined') ? false : format;
+
+			$this.summernote({
+				toolbar: buttons,
+				placeholder: placeholder,
+				height: minHeight,
+				callbacks: {
+					onImageUpload: function(data) {
+						data.pop();
+					},
+					onPaste: function(e) {
+						if (format) {
+							var bufferText = ((e.originalEvent || e).clipboardData || window.clipboardData).getData('Text');
+							e.preventDefault();
+							document.execCommand('insertText', false, bufferText);
+						}
+					}
+				}
+			});
+
+			var nativeHtmlBuilderFunc = $this.summernote('module', 'videoDialog').createVideoNode;
+
+			$this.summernote('module', 'videoDialog').createVideoNode = function(url) {
+				var wrap = $('<div class="embed-responsive embed-responsive-16by9"></div>');
+				var html = nativeHtmlBuilderFunc(url);
+				html = $(html).addClass('embed-responsive-item');
+				return wrap.append(html)[0];
+			};
+		})
+        });
+       
+
+        function delete_row(em){
+            $(em).closest('.form-group row').remove();
+            update_sku();
+        }
+
+        function delete_variant(em){
+            $(em).closest('.variant').remove();
+        }
+
+        function update_sku(){
+            $.ajax({
+               type:"POST",
+               url:'{{ route('products.sku_combination') }}',
+               data:$('#choice_form').serialize(),
+               success: function(data) {
+                console.log(data);
+                    $('#sku_combination').html(data);
+                    // AIZ.uploader.previewGenerate();
+                    AIZ.plugins.fooTable();
+
+                console.log(data);
+
+                    if (data.length > 1) {
+                       $('#show-hide-div').hide();
+                    }
+                    else {
+                        $('#show-hide-div').show();
+                    }
+               }
+           });
+        }
+
+        $('#choice_attributes').on('change', function() {
+            $('#customer_choice_options').html(null);
+            $.each($("#choice_attributes option:selected"), function(){
+                add_more_customer_choice_option($(this).val(), $(this).text());
+            });
+
+            if($('input[name="has_variant_product"]').is(':checked')) {
+            update_sku();
+        }
+        });
+
+
+
+        $(document).on('click', '.add-variant-btn', function() {
+
+
+      var data=  new FormData($('.variant-modal-form')[0]);
+        $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                url: "{{route('product.add_variant')}}",
+                type: 'POST',
+                data: data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    if(response == 1) {
+						AIZ.plugins.notify('success', '{{ translate('Variant Successfully Added.') }}');
+                        update_sku();
+                        $('#variant-modal').modal('hide');
+                    }
+					else{
+						AIZ.plugins.notify('danger', '{{ translate('Something Went Wrong.') }}');
+					}
+                }
+            });
+	});
 
 </script>
 

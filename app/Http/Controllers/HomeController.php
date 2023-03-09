@@ -223,6 +223,18 @@ class HomeController extends Controller
         return view('frontend.track_order');
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
     public function product(Request $request, $slug)
     {
         $detailedProduct  = Product::with('reviews', 'brand', 'stocks', 'user', 'user.shop')->where('auction_product', 0)->where('slug', $slug)->where('approved', 1)->first();
@@ -250,7 +262,10 @@ class HomeController extends Controller
                 $affiliateController = new AffiliateController;
                 $affiliateController->processAffiliateStats($referred_by_user->id, 1, 0, 0, 0);
             }
+
+
             if ($detailedProduct->digital == 1) {
+
                 return view('frontend.digital_product_details', compact('detailedProduct', 'product_queries', 'total_query'));
             } else {
                 return view('frontend.product_details', compact('detailedProduct', 'product_queries', 'total_query'));
@@ -258,6 +273,112 @@ class HomeController extends Controller
         }
         abort(404);
     }
+
+
+
+    public function variant_price(Request $request)
+    {
+        $product = Product::find($request->id);
+        $str = '';
+        $quantity = 0;
+        $tax = 0;
+        $max_limit = 0;
+        // dd($product->name);
+        if ($request->has('color')) {
+            $str = $request['color'];
+        }
+
+        if (json_decode($product->choice_options) != null) {
+            foreach (json_decode($product->choice_options) as $key => $choice) {
+                if ($str != null) {
+                    $str .= '-' . str_replace(' ', '', $request['attribute_id_' . $choice->attribute_id]);
+                } else {
+                    $str .= str_replace(' ', '', $request['attribute_id_' . $choice->attribute_id]);
+                }
+            }
+        }
+// dd($product);
+        $product_stock = $product->stocks->where('variant', $str)->first();
+
+        $price = $product->unit_price;
+
+
+        // if ($product->wholesale_product) {
+        //     $wholesalePrice = $product_stock->wholesalePrices->where('min_qty', '<=', $request->quantity)->where('max_qty', '>=', $request->quantity)->first();
+        //     if ($wholesalePrice) {
+        //         $price = $wholesalePrice->price;
+        //     }
+        // }
+
+        $max_limit = $quantity = $product->current_stock;
+
+        if ($quantity >= 1 && $product->min_qty <= $quantity) {
+            $in_stock = 1;
+        } else {
+            $in_stock = 0;
+        }
+
+        //Product Stock Visibility
+        if ($product->stock_visibility_state == 'text') {
+            if ($quantity >= 1 && $product->min_qty < $quantity) {
+                $quantity = translate('In Stock');
+            } else {
+                $quantity = translate('Out Of Stock');
+            }
+        }
+
+        //discount calculation
+        $discount_applicable = false;
+
+        if ($product->discount_start_date == null) {
+            $discount_applicable = true;
+        } elseif (
+            strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&
+            strtotime(date('d-m-Y H:i:s')) <= $product->discount_end_date
+        ) {
+            $discount_applicable = true;
+        }
+
+        if ($discount_applicable) {
+            if ($product->discount_type == 'percent') {
+                $price -= ($price * $product->discount) / 100;
+            } elseif ($product->discount_type == 'amount') {
+                $price -= $product->discount;
+            }
+        }
+
+        // taxes
+        foreach ($product->taxes as $product_tax) {
+            if ($product_tax->tax_type == 'percent') {
+                $tax += ($price * $product_tax->tax) / 100;
+            } elseif ($product_tax->tax_type == 'amount') {
+                $tax += $product_tax->tax;
+            }
+        }
+
+        $price += $tax;
+
+        return array(
+            'price' => single_price($price * $request->quantity),
+            'quantity' => $quantity,
+            'digital' => $product->digital,
+            'variation' => $str,
+            'max_limit' => $max_limit,
+            'in_stock' => $in_stock
+        );
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
     public function shop($slug)
     {
@@ -324,98 +445,7 @@ class HomeController extends Controller
         return redirect()->route('home_settings.index');
     }
 
-    public function variant_price(Request $request)
-    {
-        $product = Product::find($request->id);
-        $str = '';
-        $quantity = 0;
-        $tax = 0;
-        $max_limit = 0;
 
-        if ($request->has('color')) {
-            $str = $request['color'];
-        }
-
-        if (json_decode($product->choice_options) != null) {
-            foreach (json_decode($product->choice_options) as $key => $choice) {
-                if ($str != null) {
-                    $str .= '-' . str_replace(' ', '', $request['attribute_id_' . $choice->attribute_id]);
-                } else {
-                    $str .= str_replace(' ', '', $request['attribute_id_' . $choice->attribute_id]);
-                }
-            }
-        }
-
-        $product_stock = $product->stocks->where('variant', $str)->first();
-
-        $price = $product_stock->price;
-
-
-        if ($product->wholesale_product) {
-            $wholesalePrice = $product_stock->wholesalePrices->where('min_qty', '<=', $request->quantity)->where('max_qty', '>=', $request->quantity)->first();
-            if ($wholesalePrice) {
-                $price = $wholesalePrice->price;
-            }
-        }
-
-        $quantity = $product_stock->qty;
-        $max_limit = $product_stock->qty;
-
-        if ($quantity >= 1 && $product->min_qty <= $quantity) {
-            $in_stock = 1;
-        } else {
-            $in_stock = 0;
-        }
-
-        //Product Stock Visibility
-        if ($product->stock_visibility_state == 'text') {
-            if ($quantity >= 1 && $product->min_qty < $quantity) {
-                $quantity = translate('In Stock');
-            } else {
-                $quantity = translate('Out Of Stock');
-            }
-        }
-
-        //discount calculation
-        $discount_applicable = false;
-
-        if ($product->discount_start_date == null) {
-            $discount_applicable = true;
-        } elseif (
-            strtotime(date('d-m-Y H:i:s')) >= $product->discount_start_date &&
-            strtotime(date('d-m-Y H:i:s')) <= $product->discount_end_date
-        ) {
-            $discount_applicable = true;
-        }
-
-        if ($discount_applicable) {
-            if ($product->discount_type == 'percent') {
-                $price -= ($price * $product->discount) / 100;
-            } elseif ($product->discount_type == 'amount') {
-                $price -= $product->discount;
-            }
-        }
-
-        // taxes
-        foreach ($product->taxes as $product_tax) {
-            if ($product_tax->tax_type == 'percent') {
-                $tax += ($price * $product_tax->tax) / 100;
-            } elseif ($product_tax->tax_type == 'amount') {
-                $tax += $product_tax->tax;
-            }
-        }
-
-        $price += $tax;
-
-        return array(
-            'price' => single_price($price * $request->quantity),
-            'quantity' => $quantity,
-            'digital' => $product->digital,
-            'variation' => $str,
-            'max_limit' => $max_limit,
-            'in_stock' => $in_stock
-        );
-    }
 
     public function sellerpolicy()
     {
@@ -563,7 +593,7 @@ class HomeController extends Controller
 
     public function reset_password_with_code(Request $request)
     {
-        
+
         if (($user = User::where('email', $request->email)->where('verification_code', $request->code)->first()) != null) {
             if ($request->password == $request->password_confirmation) {
                 $user->password = Hash::make($request->password);

@@ -11,8 +11,8 @@ class ProductUtility
     {
         $options = array();
         if (
-            isset($collection['colors_active']) &&
-            $collection['colors_active'] &&
+            // isset($collection['colors_active']) &&
+            // $collection['colors_active'] &&
             $collection['colors'] &&
             count($collection['colors']) > 0
         ) {
@@ -36,12 +36,14 @@ class ProductUtility
 
     public static function get_combination_string($combination, $collection)
     {
+
+        // dd($combination, $collection);
         $str = '';
         foreach ($combination as $key => $item) {
             if ($key > 0) {
                 $str .= '-' . str_replace(' ', '', $item);
             } else {
-                if (isset($collection['colors_active']) && $collection['colors_active'] && $collection['colors'] && count($collection['colors']) > 0) {
+                if ($collection['colors'] && count($collection['colors']) > 0) {
                     $color_name = Color::where('code', $item)->first()->name;
                     $str .= $color_name;
                 } else {

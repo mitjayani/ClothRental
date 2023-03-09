@@ -20,6 +20,8 @@ use App\Services\ProductService;
 use App\Services\ProductTaxService;
 use App\Services\ProductFlashDealService;
 use App\Services\ProductStockService;
+use Exception;
+use Session;
 
 class ProductController extends Controller
 {
@@ -44,7 +46,7 @@ class ProductController extends Controller
         $this->middleware(['permission:show_all_products'])->only('all_products');
         $this->middleware(['permission:show_in_house_products'])->only('admin_products');
         $this->middleware(['permission:show_seller_products'])->only('seller_products');
-        $this->middleware(['permission:product_edit'])->only('admin_product_edit','seller_product_edit');
+        $this->middleware(['permission:product_edit'])->only('admin_product_edit', 'seller_product_edit');
         $this->middleware(['permission:product_duplicate'])->only('duplicate');
         $this->middleware(['permission:product_delete'])->only('destroy');
     }
@@ -168,6 +170,8 @@ class ProductController extends Controller
             ->with('childrenCategories')
             ->get();
 
+        Session::forget('product_variant');
+
         return view('backend.product.products.create', compact('categories'));
     }
 
@@ -192,24 +196,36 @@ class ProductController extends Controller
      */
     public function store(ProductRequest $request)
     {
+        if ($request->has_variant_product) {
+            $request->merge(['variants_data' => Session::get('product_variant')]);
+        }
         $product = $this->productService->store($request->except([
             '_token', 'sku', 'choice', 'tax_id', 'tax', 'tax_type', 'flash_deal_id', 'flash_discount', 'flash_discount_type'
         ]));
+
         $request->merge(['product_id' => $product->id]);
 
         //VAT & Tax
-        if($request->tax_id) {
+        if ($request->tax_id) {
             $this->productTaxService->store($request->only([
                 'tax_id', 'tax', 'tax_type', 'product_id'
             ]));
         }
+        // flash(translate('Product has been inserted successfully'))->success();
 
-        //Flash Deal
-        $this->productFlashDealService->store($request->only([
-            'flash_deal_id', 'flash_discount', 'flash_discount_type'
-        ]), $product);
+        // Artisan::call('view:clear');
+        // Artisan::call('cache:clear');
+
+        // return redirect()->route('products.admin');
+
+        // Flash Deal
+        // $this->productFlashDealService->store($request->only([
+        //     'flash_deal_id', 'flash_discount', 'flash_discount_type'
+        // ]), $product);
 
         //Product Stock
+
+
         $this->productStockService->store($request->only([
             'colors_active', 'colors', 'choice_no', 'unit_price', 'sku', 'current_stock', 'product_id'
         ]), $product);
@@ -394,7 +410,7 @@ class ProductController extends Controller
         $product_new = $product->replicate();
         $product_new->slug = $product_new->slug . '-' . Str::random(5);
         $product_new->save();
-        
+
         //Product Stock
         $this->productStockService->product_duplicate_store($product->stocks, $product_new);
 
@@ -442,7 +458,7 @@ class ProductController extends Controller
         }
 
         $product->save();
-        
+
         Artisan::call('view:clear');
         Artisan::call('cache:clear');
         return 1;
@@ -465,7 +481,7 @@ class ProductController extends Controller
         }
 
         $product->save();
-        
+
         Artisan::call('view:clear');
         Artisan::call('cache:clear');
         return 1;
@@ -486,7 +502,7 @@ class ProductController extends Controller
     public function sku_combination(Request $request)
     {
         $options = array();
-        if ($request->has('colors_active') && $request->has('colors') && count($request->colors) > 0) {
+        if ($request->has('colors') && count($request->colors) > 0) {
             $colors_active = 1;
             array_push($options, $request->colors);
         } else {
@@ -543,5 +559,29 @@ class ProductController extends Controller
 
         $combinations = Combinations::makeCombinations($options);
         return view('backend.product.products.sku_combinations_edit', compact('combinations', 'unit_price', 'colors_active', 'product_name', 'product'));
+    }
+
+    public function add_product_variant(Request $request)
+    {
+        try {
+            Session::push('product_variant',  $request->all());
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    public function showVal()
+    {
+        // Session::flush();
+        // Session::remove('product_variant');
+        // Session::forget('product_variant');
+        // $data=Session::get('product_variant');
+        // foreach ($data as $key => $value) {
+        //     # code...
+        //     print_r($value['variant_id']);
+        // }
+        dd(Session::get('product_variant'));
+        // Session::flush();
     }
 }

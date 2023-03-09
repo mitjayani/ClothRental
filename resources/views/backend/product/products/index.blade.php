@@ -129,8 +129,13 @@
                         @endif
                         <td>
                             <div class="row gutters-5 w-200px w-md-300px mw-100">
+                            <!-- variant_product -->
+
                                 <div class="col-auto">
-                                    <img src="{{ uploaded_asset($product->thumbnail_img)}}" alt="Image" class="size-50px img-fit">
+                                @if($product->variant_product)
+                                <span class="badge badge-inline badge-warning ml-n3 mt-n2 z-2 position-absolute">Variant</span>
+                                @endif
+                                    <img src="{{ uploaded_asset($product->thumbnail_img)}}" alt="Image" class="size-50px img-fit rounded">
                                 </div>
                                 <div class="col">
                                     <span class="text-muted text-truncate-2">{{ $product->getTranslation('name') }}</span>
@@ -148,17 +153,8 @@
                         <td>
                             @php
                                 $qty = 0;
-                                if($product->variant_product) {
-                                    foreach ($product->stocks as $key => $stock) {
-                                        $qty += $stock->qty;
-                                        echo $stock->variant.' - '.$stock->qty.'<br>';
-                                    }
-                                }
-                                else {
-                                    //$qty = $product->current_stock;
-                                    $qty = optional($product->stocks->first())->qty;
+                                    $qty = $product->current_stock;
                                     echo $qty;
-                                }
                             @endphp
                             @if($qty <= $product->low_stock_quantity)
                                 <span class="badge badge-inline badge-danger">Low</span>
