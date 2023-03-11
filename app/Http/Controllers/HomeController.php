@@ -223,21 +223,14 @@ class HomeController extends Controller
         return view('frontend.track_order');
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-    public function product(Request $request, $slug)
+    public function product(Request $request, $slug, $sku)
     {
-        $detailedProduct  = Product::with('reviews', 'brand', 'stocks', 'user', 'user.shop')->where('auction_product', 0)->where('slug', $slug)->where('approved', 1)->first();
+        $detailedProduct  = Product::with('reviews', 'brand', 'stocks', 'user', 'user.shop')
+            ->where('auction_product', 0)
+            ->where('slug', $slug)
+            ->where('sku', $sku)
+            ->where('approved', 1)
+            ->first();
 
         $product_queries = ProductQuery::where('product_id', $detailedProduct->id)->where('customer_id', '!=', Auth::id())->latest('id')->paginate(10);
         $total_query = ProductQuery::where('product_id', $detailedProduct->id)->count();
@@ -283,7 +276,6 @@ class HomeController extends Controller
         $quantity = 0;
         $tax = 0;
         $max_limit = 0;
-        // dd($product->name);
         if ($request->has('color')) {
             $str = $request['color'];
         }
@@ -297,7 +289,6 @@ class HomeController extends Controller
                 }
             }
         }
-// dd($product);
         $product_stock = $product->stocks->where('variant', $str)->first();
 
         $price = $product->unit_price;

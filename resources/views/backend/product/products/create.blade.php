@@ -445,16 +445,6 @@ CoreComponentRepository::initializeCache();
                         </div>
                     </div>
                 </div>
-
-                <!--                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0 h6">{{translate('Product Shipping Cost')}}</h5>
-                    </div>
-                    <div class="card-body">
-
-                    </div>
-                </div>-->
-
                 <div class="card hide-on-variant">
                     <div class="card-header">
                         <h5 class="mb-0 h6">{{translate('PDF Specification')}}</h5>
@@ -849,9 +839,39 @@ CoreComponentRepository::initializeCache();
         } });
 
 
+        
+        
+            $(document).on('click', '.variant-remove-btn', function() {
+           var fd = new FormData();
+            fd.append( 'variant', $(this).data('variant') );
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                url: "{{route('product.remove_variant')}}",
+                type: 'POST',
+                data: fd,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    if(response == 1) {
+						AIZ.plugins.notify('success', '{{ translate('Variant Successfully Removed.') }}');
+                        update_sku();
+                    }
+					else{
+						AIZ.plugins.notify('danger', '{{ translate('Something Went Wrong.') }}');
+					}
+                }
+            });
+        });
+
+
         $(document).on('click', '.variant-modal-btn', function() {
             $('#variant-modal').modal('show', {backdrop: 'static'});
-            $('input[name="variant_id"]').val($(this).data('variant'));
+            var variant=$(this).data('variant');
+            $('input[name="variant_id"]').val(variant);
+            $('.variant-lable').val(variant);
             $(".aiz-text-editor-md").each(function(el) {
 			var $this = $(this);
 
@@ -913,18 +933,15 @@ CoreComponentRepository::initializeCache();
             $(em).closest('.variant').remove();
         }
 
+
         function update_sku(){
             $.ajax({
                type:"POST",
                url:'{{ route('products.sku_combination') }}',
                data:$('#choice_form').serialize(),
                success: function(data) {
-                console.log(data);
                     $('#sku_combination').html(data);
-                    // AIZ.uploader.previewGenerate();
                     AIZ.plugins.fooTable();
-
-                console.log(data);
 
                     if (data.length > 1) {
                        $('#show-hide-div').hide();

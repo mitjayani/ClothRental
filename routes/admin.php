@@ -104,6 +104,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
         Route::post('/products/sku_combination_edit', 'sku_combination_edit')->name('products.sku_combination_edit');
         Route::post('/products/add-more-choice-option', 'add_more_choice_option')->name('products.add-more-choice-option');
         Route::post('/products/variant/add', 'add_product_variant')->name('product.add_variant');
+        Route::post('/products/variant/remove', 'remove_product_variant')->name('product.remove_variant');
 
         Route::get('/products/showVal', 'showVal');
     });

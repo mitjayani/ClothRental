@@ -132,7 +132,7 @@
                             <!-- variant_product -->
 
                                 <div class="col-auto">
-                                @if($product->variant_product)
+                                @if($product->variation_parent_product_id != '')
                                 <span class="badge badge-inline badge-warning ml-n3 mt-n2 z-2 position-absolute">Variant</span>
                                 @endif
                                     <img src="{{ uploaded_asset($product->thumbnail_img)}}" alt="Image" class="size-50px img-fit rounded">
@@ -187,7 +187,7 @@
                             </label>
                         </td>
                         <td class="text-right">
-                            <a class="btn btn-soft-success btn-icon btn-circle btn-sm"  href="{{ route('product', $product->slug) }}" target="_blank" title="{{ translate('View') }}">
+                            <a class="btn btn-soft-success btn-icon btn-circle btn-sm"  href="{{ route('product', ['slug'=>$product->slug,'sku'=>$product->sku]) }}" target="_blank" title="{{ translate('View') }}">
                                 <i class="las la-eye"></i>
                             </a>
                             @can('product_edit')

@@ -3,7 +3,7 @@
 	<div class="modal-dialog modal-dialog-centered modal-xl">
 		<div class="modal-content  h-100">
 			<div class="modal-header">
-				<h5 class="modal-title h6">{{translate('Add New Variant ddd')}}</h5>
+				<h5 class="modal-title h6">{{translate('Add New Variant ddd')}} </h5>
 				<button type="button" class="close" data-dismiss="modal"></button>
 			</div>
 			<div class="modal-body product-variant-modal-body">
@@ -13,7 +13,17 @@
 							@csrf
 							<input type="hidden" name="added_by" value="admin">
 							<input type="hidden" name="variant_id" >
-
+							<div class="card">
+								
+								<div class="card-body">
+								<div class="form-group row align-items-center">
+										<label class="col-md-3 col-from-label">{{translate('Variant')}}</label>
+										<div class="col-md-8">
+											<input type="text" class="form-control variant-lable"  placeholder="{{ translate('Variant') }}" disabled>
+										</div>
+									</div>
+								</div>
+							</div>
 							<div class="card">
 								<div class="card-header">
 									<h5 class="mb-0 h6">{{translate('Product Images')}}</h5>

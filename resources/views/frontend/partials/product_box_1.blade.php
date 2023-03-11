@@ -4,7 +4,7 @@
     @endif
     <div class="position-relative">
         @php
-            $product_url = route('product', $product->slug);
+            $product_url = route('product', ['slug'=>$product->slug,'sku'=>$product->sku]);
             if($product->auction_product == 1) {
                 $product_url = route('auction-product', $product->slug);
             }

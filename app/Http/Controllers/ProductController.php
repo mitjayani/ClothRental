@@ -571,6 +571,21 @@ class ProductController extends Controller
         }
     }
 
+    public function remove_product_variant(Request $request)
+    {
+        try {
+            $productVariant = Session::get('product_variant');
+        
+            $filtered = array_filter($productVariant, function($variant) use($request) {
+                return $variant['variant_id'] !== $request->variant;
+            });
+            Session::put('product_variant',  $filtered);
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
     public function showVal()
     {
         // Session::flush();

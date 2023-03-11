@@ -25,7 +25,7 @@
     <!-- Open Graph data -->
     <meta property="og:title" content="{{ $detailedProduct->meta_title }}" />
     <meta property="og:type" content="og:product" />
-    <meta property="og:url" content="{{ route('product', $detailedProduct->slug) }}" />
+    <meta property="og:url" content="{{ route('product', ['slug'=>$detailedProduct->slug,'sku'=>$detailedProduct->sku]) }}" />
     <meta property="og:image" content="{{ uploaded_asset($detailedProduct->meta_img) }}" />
     <meta property="og:description" content="{{ $detailedProduct->meta_description }}" />
     <meta property="og:site_name" content="{{ get_setting('meta_title') }}" />
@@ -598,7 +598,7 @@
                                     <li class="py-3 px-0 list-group-item border-light">
                                         <div class="row gutters-10 align-items-center">
                                             <div class="col-5">
-                                                <a href="{{ route('product', $top_product->slug) }}"
+                                                <a href="{{ route('product',['slug'=>$top_product->slug,'sku'=>$top_product->sku]) }}"
                                                     class="d-block text-reset">
                                                     <img class="img-fit lazyload h-xxl-110px h-xl-80px h-120px"
                                                         src="{{ static_asset('assets/img/placeholder.jpg') }}"
@@ -609,7 +609,7 @@
                                             </div>
                                             <div class="col-7 text-left">
                                                 <h4 class="fs-13 text-truncate-2">
-                                                    <a href="{{ route('product', $top_product->slug) }}"
+                                                    <a href="{{ route('product', ['slug'=>$top_product->slug,'sku'=>$top_product->sku]) }}"
                                                         class="d-block text-reset">{{ $top_product->getTranslation('name') }}</a>
                                                 </h4>
                                                 <div class="rating rating-sm mt-1">
@@ -740,7 +740,7 @@
                                         <div
                                             class="aiz-card-box border border-light rounded hov-shadow-md my-2 has-transition">
                                             <div class="">
-                                                <a href="{{ route('product', $related_product->slug) }}"
+                                                <a href="{{ route('product',  ['slug'=>$related_product->slug,'sku'=>$related_product->sku]) }}"
                                                     class="d-block">
                                                     <img class="img-fit lazyload mx-auto h-140px h-md-210px"
                                                         src="{{ static_asset('assets/img/placeholder.jpg') }}"
@@ -762,7 +762,7 @@
                                                     {{ renderStarRating($related_product->rating) }}
                                                 </div>
                                                 <h3 class="fw-600 fs-13 text-truncate-2 lh-1-4 mb-0 h-35px">
-                                                    <a href="{{ route('product', $related_product->slug) }}"
+                                                    <a href="{{ route('product', ['slug'=>$related_product->slug,'sku'=>$related_product->sku]) }}"
                                                         class="d-block text-reset">{{ $related_product->getTranslation('name') }}</a>
                                                 </h3>
                                                 @if (addon_is_activated('club_point'))
@@ -912,7 +912,7 @@
                         </div>
                         <div class="form-group">
                             <textarea class="form-control" rows="8" name="message" required
-                                placeholder="{{ translate('Your Question') }}">{{ route('product', $detailedProduct->slug) }}</textarea>
+                                placeholder="{{ translate('Your Question') }}">{{ route('product', ['slug'=>$detailedProduct->slug,'sku'=>$detailedProduct->sku]) }}</textarea>
                         </div>
                     </div>
                     <div class="modal-footer">

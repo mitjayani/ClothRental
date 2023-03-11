@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Product;
+use App\Models\Color;
 use App\Models\User;
 use App\Utility\ProductUtility;
 use Combinations;
@@ -15,6 +16,7 @@ class ProductService
         $collection = collect($data);
         $approved = 1;
         $variantBasedProduct = array();
+        $variant_id_arr = [];
 
         if (isset($collection['has_variant_product'])) {
             $newcollection = $collection['variants_data'][0];
@@ -24,10 +26,12 @@ class ProductService
             $newcollection['unit'] = $collection['unit'];
             $newcollection['tags'] = $collection['tags'];
             $newcollection['colors'] = $collection['colors'];
-            $newcollection['choice_no'] = $collection['choice_no'];
-            $newcollection['choice_attributes'] = $collection['choice_attributes'];
+            $newcollection['choice_no'] = isset($collection['choice_no']) ? $collection['choice_no'] : [];
+            $newcollection['choice_attributes'] = isset($collection['choice_attributes']) ? $collection['choice_attributes'] : [];
             $newcollection['button'] = $collection['button'];
             $newcollection['variants_data'] = $collection['variants_data'];
+            $newcollection['variants_ids'] = array_column($collection['variants_data'], "variant_id");
+
             if (isset($collection['choice_no']) && $collection['choice_no']) {
                 foreach ($collection['choice_no'] as $key => $no) {
                     $str = 'choice_options_' . $no;
@@ -90,7 +94,7 @@ class ProductService
         }
         unset($collection['flat_shipping_cost']);
 
-        $slug = Str::slug($collection['name']) . '-v-' . $collection['sku'];
+        $slug = Str::slug($collection['name']);
         $same_slug_count = Product::where('slug', 'LIKE', $slug . '%')->count();
         $slug_suffix = ($same_slug_count > -1) ? '-' . $same_slug_count + 1 : '';
         $slug .= $slug_suffix;
@@ -102,8 +106,24 @@ class ProductService
             $collection['colors'] &&
             count($collection['colors']) > 0
         ) {
-            $colors = json_encode($collection['colors']);
+
+            $variantColorsArr = array();
+            foreach ($collection['variants_ids'] as $value) {
+                $variantColorsArr = array_merge($variantColorsArr, explode('-', $value));
+            }
+            $colors_name = Color::whereIn('name', $variantColorsArr)->get();
+
+            $variant_colors_code = $colors_name->pluck('code')->toArray();
+            $allColors = $collection['colors'];
+
+            $intersect = array_intersect($allColors, $variant_colors_code);
+            $filtered = array_filter($allColors, function ($color) use ($intersect) {
+                return in_array($color, $intersect);
+            });
+
+            $colors = json_encode($filtered);
         }
+
 
         $options = ProductUtility::get_attribute_options($collection);
 
